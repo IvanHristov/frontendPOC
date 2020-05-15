@@ -1,9 +1,8 @@
 import React from "react";
 import { Router } from "@reach/router";
-import Contacts from "./Contacts";
+import Contacts from "./contacts/ContactsOverview";
 
 function App() {
-  console.log("here");
   return (
     <Router>
       <Contacts path="/" />
