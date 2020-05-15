@@ -1,10 +1,7 @@
 import gql from 'graphql-tag';
-import * as React from 'react';
 import * as ApolloReactCommon from '@apollo/react-common';
-import * as ApolloReactComponents from '@apollo/react-components';
-import * as ApolloReactHoc from '@apollo/react-hoc';
+import * as ApolloReactHooks from '@apollo/react-hooks';
 export type Maybe<T> = T | null;
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -131,10 +128,12 @@ export type IQueryCompanyArgs = {
 };
 
 
-export type IContactsQueryVariables = {};
+export type IGetContactsQueryVariables = {
+  input?: Maybe<IContactInput>;
+};
 
 
-export type IContactsQuery = (
+export type IGetContactsQuery = (
   { __typename?: 'Query' }
   & { result: Array<Maybe<(
     { __typename?: 'Contact' }
@@ -146,10 +145,27 @@ export type IContactsQuery = (
   )>> }
 );
 
+export type ICreateContactMutationVariables = {
+  input: INewContactInput;
+};
 
-export const ContactsDocument = gql`
-    query Contacts {
-  result: contacts {
+
+export type ICreateContactMutation = (
+  { __typename?: 'Mutation' }
+  & { result: (
+    { __typename?: 'Contact' }
+    & Pick<IContact, 'id' | 'first_name' | 'last_name' | 'email'>
+    & { company?: Maybe<(
+      { __typename?: 'Company' }
+      & Pick<ICompany, 'company_name'>
+    )> }
+  ) }
+);
+
+
+export const GetContactsDocument = gql`
+    query GetContacts($input: ContactInput) {
+  result: contacts(input: $input) {
     id
     first_name
     last_name
@@ -160,23 +176,67 @@ export const ContactsDocument = gql`
   }
 }
     `;
-export type ContactsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<IContactsQuery, IContactsQueryVariables>, 'query'>;
 
-    export const ContactsComponent = (props: ContactsComponentProps) => (
-      <ApolloReactComponents.Query<IContactsQuery, IContactsQueryVariables> query={ContactsDocument} {...props} />
-    );
-    
-export type IContactsProps<TChildProps = {}, TDataName extends string = 'data'> = {
-      [key in TDataName]: ApolloReactHoc.DataValue<IContactsQuery, IContactsQueryVariables>
-    } & TChildProps;
-export function withContacts<TProps, TChildProps = {}, TDataName extends string = 'data'>(operationOptions?: ApolloReactHoc.OperationOption<
-  TProps,
-  IContactsQuery,
-  IContactsQueryVariables,
-  IContactsProps<TChildProps, TDataName>>) {
-    return ApolloReactHoc.withQuery<TProps, IContactsQuery, IContactsQueryVariables, IContactsProps<TChildProps, TDataName>>(ContactsDocument, {
-      alias: 'contacts',
-      ...operationOptions
-    });
-};
-export type ContactsQueryResult = ApolloReactCommon.QueryResult<IContactsQuery, IContactsQueryVariables>;
+/**
+ * __useGetContactsQuery__
+ *
+ * To run a query within a React component, call `useGetContactsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetContactsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetContactsQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useGetContactsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<IGetContactsQuery, IGetContactsQueryVariables>) {
+        return ApolloReactHooks.useQuery<IGetContactsQuery, IGetContactsQueryVariables>(GetContactsDocument, baseOptions);
+      }
+export function useGetContactsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<IGetContactsQuery, IGetContactsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<IGetContactsQuery, IGetContactsQueryVariables>(GetContactsDocument, baseOptions);
+        }
+export type GetContactsQueryHookResult = ReturnType<typeof useGetContactsQuery>;
+export type GetContactsLazyQueryHookResult = ReturnType<typeof useGetContactsLazyQuery>;
+export type GetContactsQueryResult = ApolloReactCommon.QueryResult<IGetContactsQuery, IGetContactsQueryVariables>;
+export const CreateContactDocument = gql`
+    mutation CreateContact($input: NewContactInput!) {
+  result: createContact(input: $input) {
+    id
+    first_name
+    last_name
+    email
+    company {
+      company_name
+    }
+  }
+}
+    `;
+export type ICreateContactMutationFn = ApolloReactCommon.MutationFunction<ICreateContactMutation, ICreateContactMutationVariables>;
+
+/**
+ * __useCreateContactMutation__
+ *
+ * To run a mutation, you first call `useCreateContactMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateContactMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createContactMutation, { data, loading, error }] = useCreateContactMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateContactMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ICreateContactMutation, ICreateContactMutationVariables>) {
+        return ApolloReactHooks.useMutation<ICreateContactMutation, ICreateContactMutationVariables>(CreateContactDocument, baseOptions);
+      }
+export type CreateContactMutationHookResult = ReturnType<typeof useCreateContactMutation>;
+export type CreateContactMutationResult = ApolloReactCommon.MutationResult<ICreateContactMutation>;
+export type CreateContactMutationOptions = ApolloReactCommon.BaseMutationOptions<ICreateContactMutation, ICreateContactMutationVariables>;

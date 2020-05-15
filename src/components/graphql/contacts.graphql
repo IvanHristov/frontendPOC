@@ -1,5 +1,17 @@
-query Contacts {
-  result: contacts {
+query GetContacts($input: ContactInput) {
+  result: contacts(input: $input) {
+    id
+    first_name
+    last_name
+    email
+    company {
+      company_name
+    }
+  }
+}
+
+mutation CreateContact($input: NewContactInput!) {
+  result: createContact(input: $input) {
     id
     first_name
     last_name

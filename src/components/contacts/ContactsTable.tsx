@@ -9,9 +9,11 @@ import {
   Paper
 } from "@material-ui/core";
 
-import { IContactsQuery } from "../../generated/graphql";
+import { IGetContactsQuery } from "../../generated/graphql";
 
-const ContactsTable: React.FunctionComponent<IContactsQuery> = ({ result }) => {
+const ContactsTable: React.FunctionComponent<IGetContactsQuery> = ({
+  result
+}) => {
   return (
     <div>
       <h1>Contacts</h1>

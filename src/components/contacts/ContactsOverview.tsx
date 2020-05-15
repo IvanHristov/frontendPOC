@@ -1,31 +1,58 @@
-import React, { useState, FunctionComponent } from "react";
+import React, { useState, FunctionComponent, useEffect } from "react";
 import { RouteComponentProps } from "@reach/router";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import Loader from "../Loader";
 
-import { INewContactInput, IContactsQuery } from "../../generated/graphql";
+import {
+  INewContactInput,
+  IGetContactsQuery,
+  useGetContactsQuery,
+  useCreateContactMutation,
+  IContact,
+  GetContactsDocument
+} from "../../generated/graphql";
 
-import { GET_CONTACTS, ADD_CONTACT } from "../graphql/contacts";
 import ContactsTable from "./ContactsTable";
 import NewContact from "./NewContact";
 
 const ContactsOverview: FunctionComponent<RouteComponentProps> = () => {
   const [modal, setModal] = useState(false);
-  const { loading, error, data } = useQuery<IContactsQuery>(GET_CONTACTS);
-  const [createContact, newContact] = useMutation(ADD_CONTACT, {
-    update(cache, { data: { result: newContact } }) {
-      const { result } = cache.readQuery({
-        query: GET_CONTACTS
-      }) as IContactsQuery;
-
-      cache.writeQuery({
-        query: GET_CONTACTS,
-        data: { result: [newContact, ...result] }
-      });
+  const { data, loading, error } = useGetContactsQuery();
+  const [createContact, newContact] = useCreateContactMutation({
+    update(cache, res) {
+      if (res.data) {
+        const newContact: IContact = res.data.result;
+        const { result } = cache.readQuery({
+          query: GetContactsDocument
+        }) as IGetContactsQuery;
+        if (result) {
+          cache.writeQuery({
+            query: GetContactsDocument,
+            data: { result: [newContact, ...result] }
+          });
+        }
+      }
     }
   });
+  // const [getContacts, { data, loading }] = useContactsLazyQuery();
+
+  // const { loading, error, data } = useQuery<IContactsQuery>(GET_CONTACTS);
+  // const [createContact, newContact] = useMutation(ADD_CONTACT, {
+  //   update(cache, { data: { result: newContact } }) {
+  //     const { result } = cache.readQuery({
+  //       query: GET_CONTACTS
+  //     }) as IGetContactsQuery;
+  //     console.log("in cache");
+  //     cache.writeQuery({
+  //       query: GET_CONTACTS,
+  //       data: { result: [newContact, ...result] }
+  //     });
+  //   }
+  // });
   const onSubmit = (input: INewContactInput) => {
     setModal(false);
+    console.log("before send");
+    // createContact({ variables: { input } });
     createContact({
       variables: { input },
       optimisticResponse: {
@@ -43,6 +70,7 @@ const ContactsOverview: FunctionComponent<RouteComponentProps> = () => {
         }
       }
     });
+    console.log("after send");
   };
 
   if (loading) {
