@@ -14,11 +14,13 @@
     "apollo-client": "^2.6.9",
     "apollo-link-context": "^1.0.20",
     "apollo-link-http": "^1.5.17",
+    "apollo-link-ws": "^1.0.20",
     "graphql": "^14.0.0",
     "graphql-tag": "^2.10.3",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
-    "react-spinners": "^0.8.3"
+    "react-spinners": "^0.8.3",
+    "subscriptions-transport-ws": "^0.9.16"
   },
   "devDependencies": {
     "@apollo/react-common": "^3.1.4",
@@ -42,7 +44,8 @@
     "typescript": "^3.4.4"
   },
   "scripts": {
-    "start": "parcel src/index.html",
+    "clear-build-cache": "rm -rf .cache/ dist/",
+    "start": "yarn generate && parcel src/index.html",
     "generate": "graphql-codegen --config codegen.yml"
   },
   "browserslist": [

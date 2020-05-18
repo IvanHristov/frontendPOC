@@ -1,6 +1,5 @@
 import React, { useState, FunctionComponent, useEffect } from "react";
 import { RouteComponentProps } from "@reach/router";
-import { useQuery, useMutation } from "@apollo/react-hooks";
 import Loader from "../Loader";
 
 import {
@@ -9,7 +8,11 @@ import {
   useGetContactsQuery,
   useCreateContactMutation,
   IContact,
-  GetContactsDocument
+  GetContactsDocument,
+  ContactCreatedDocument,
+  ContactUpdatedDocument,
+  useDeleteContactMutation,
+  IContactInput
 } from "../../generated/graphql";
 
 import ContactsTable from "./ContactsTable";
@@ -17,7 +20,7 @@ import NewContact from "./NewContact";
 
 const ContactsOverview: FunctionComponent<RouteComponentProps> = () => {
   const [modal, setModal] = useState(false);
-  const { data, loading, error } = useGetContactsQuery();
+  const { data, loading, error, subscribeToMore } = useGetContactsQuery();
   const [createContact, newContact] = useCreateContactMutation({
     update(cache, res) {
       if (res.data) {
@@ -34,25 +37,34 @@ const ContactsOverview: FunctionComponent<RouteComponentProps> = () => {
       }
     }
   });
-  // const [getContacts, { data, loading }] = useContactsLazyQuery();
 
-  // const { loading, error, data } = useQuery<IContactsQuery>(GET_CONTACTS);
-  // const [createContact, newContact] = useMutation(ADD_CONTACT, {
-  //   update(cache, { data: { result: newContact } }) {
-  //     const { result } = cache.readQuery({
-  //       query: GET_CONTACTS
-  //     }) as IGetContactsQuery;
-  //     console.log("in cache");
-  //     cache.writeQuery({
-  //       query: GET_CONTACTS,
-  //       data: { result: [newContact, ...result] }
-  //     });
-  //   }
-  // });
+  const [deleteContact, deletedContact] = useDeleteContactMutation();
+
+  useEffect(() => {
+    subscribeToMore({
+      document: ContactCreatedDocument,
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData.data) return prev;
+        const newContact = subscriptionData.data.result;
+
+        return Object.assign({}, prev, {
+          result: [newContact, ...prev.result]
+        });
+      }
+    });
+
+    subscribeToMore({
+      document: ContactUpdatedDocument,
+      updateQuery: (prev, newData) => {
+        console.log("prev", prev);
+        console.log("newData", newData);
+        return prev;
+      }
+    });
+  }, []);
+
   const onSubmit = (input: INewContactInput) => {
     setModal(false);
-    console.log("before send");
-    // createContact({ variables: { input } });
     createContact({
       variables: { input },
       optimisticResponse: {
@@ -70,9 +82,14 @@ const ContactsOverview: FunctionComponent<RouteComponentProps> = () => {
         }
       }
     });
-    console.log("after send");
   };
 
+  const onDeleteContact = (input: IContactInput) => {
+    console.log("in delete", input);
+    deleteContact({ variables: { input } });
+  };
+
+  console.log("rerender");
   if (loading) {
     return <Loader />;
   }
@@ -86,14 +103,15 @@ const ContactsOverview: FunctionComponent<RouteComponentProps> = () => {
 
   return (
     <div>
-      {/* {loading ? <Loader /> : null}
-      {error ? <h1>ERROR</h1> : null}
-      {modal ? <h1>New Contact</h1> : null} */}
-
       <div className="col-xs-2">
         <button onClick={() => setModal(true)}>New Contact</button>
       </div>
-      {data ? <ContactsTable result={data.result} /> : null}
+      {data && data.result ? (
+        <ContactsTable
+          onDelete={onDeleteContact}
+          result={data.result as IContact[]}
+        />
+      ) : null}
     </div>
   );
 };

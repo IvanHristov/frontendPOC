@@ -127,6 +127,21 @@ export type IQueryCompanyArgs = {
   input: ICompanyInput;
 };
 
+export type ISubscription = {
+   __typename?: 'Subscription';
+  contactCreated: IContact;
+  contactUpdated: IContact;
+};
+
+
+export type IContactDetailsFragment = (
+  { __typename?: 'Contact' }
+  & Pick<IContact, 'id' | 'first_name' | 'last_name' | 'email'>
+  & { company?: Maybe<(
+    { __typename?: 'Company' }
+    & Pick<ICompany, 'company_name'>
+  )> }
+);
 
 export type IGetContactsQueryVariables = {
   input?: Maybe<IContactInput>;
@@ -137,11 +152,7 @@ export type IGetContactsQuery = (
   { __typename?: 'Query' }
   & { result: Array<Maybe<(
     { __typename?: 'Contact' }
-    & Pick<IContact, 'id' | 'first_name' | 'last_name' | 'email'>
-    & { company?: Maybe<(
-      { __typename?: 'Company' }
-      & Pick<ICompany, 'company_name'>
-    )> }
+    & IContactDetailsFragment
   )>> }
 );
 
@@ -154,28 +165,63 @@ export type ICreateContactMutation = (
   { __typename?: 'Mutation' }
   & { result: (
     { __typename?: 'Contact' }
-    & Pick<IContact, 'id' | 'first_name' | 'last_name' | 'email'>
-    & { company?: Maybe<(
-      { __typename?: 'Company' }
-      & Pick<ICompany, 'company_name'>
-    )> }
+    & IContactDetailsFragment
   ) }
 );
 
+export type IDeleteContactMutationVariables = {
+  input: IContactInput;
+};
 
-export const GetContactsDocument = gql`
-    query GetContacts($input: ContactInput) {
-  result: contacts(input: $input) {
-    id
-    first_name
-    last_name
-    email
-    company {
-      company_name
-    }
+
+export type IDeleteContactMutation = (
+  { __typename?: 'Mutation' }
+  & { result: Array<Maybe<(
+    { __typename?: 'Contact' }
+    & IContactDetailsFragment
+  )>> }
+);
+
+export type IContactCreatedSubscriptionVariables = {};
+
+
+export type IContactCreatedSubscription = (
+  { __typename?: 'Subscription' }
+  & { result: (
+    { __typename?: 'Contact' }
+    & IContactDetailsFragment
+  ) }
+);
+
+export type IContactUpdatedSubscriptionVariables = {};
+
+
+export type IContactUpdatedSubscription = (
+  { __typename?: 'Subscription' }
+  & { result: (
+    { __typename?: 'Contact' }
+    & IContactDetailsFragment
+  ) }
+);
+
+export const ContactDetailsFragmentDoc = gql`
+    fragment ContactDetails on Contact {
+  id
+  first_name
+  last_name
+  email
+  company {
+    company_name
   }
 }
     `;
+export const GetContactsDocument = gql`
+    query GetContacts($input: ContactInput) {
+  result: contacts(input: $input) {
+    ...ContactDetails
+  }
+}
+    ${ContactDetailsFragmentDoc}`;
 
 /**
  * __useGetContactsQuery__
@@ -205,16 +251,10 @@ export type GetContactsQueryResult = ApolloReactCommon.QueryResult<IGetContactsQ
 export const CreateContactDocument = gql`
     mutation CreateContact($input: NewContactInput!) {
   result: createContact(input: $input) {
-    id
-    first_name
-    last_name
-    email
-    company {
-      company_name
-    }
+    ...ContactDetails
   }
 }
-    `;
+    ${ContactDetailsFragmentDoc}`;
 export type ICreateContactMutationFn = ApolloReactCommon.MutationFunction<ICreateContactMutation, ICreateContactMutationVariables>;
 
 /**
@@ -240,3 +280,91 @@ export function useCreateContactMutation(baseOptions?: ApolloReactHooks.Mutation
 export type CreateContactMutationHookResult = ReturnType<typeof useCreateContactMutation>;
 export type CreateContactMutationResult = ApolloReactCommon.MutationResult<ICreateContactMutation>;
 export type CreateContactMutationOptions = ApolloReactCommon.BaseMutationOptions<ICreateContactMutation, ICreateContactMutationVariables>;
+export const DeleteContactDocument = gql`
+    mutation DeleteContact($input: ContactInput!) {
+  result: deleteContact(input: $input) {
+    ...ContactDetails
+  }
+}
+    ${ContactDetailsFragmentDoc}`;
+export type IDeleteContactMutationFn = ApolloReactCommon.MutationFunction<IDeleteContactMutation, IDeleteContactMutationVariables>;
+
+/**
+ * __useDeleteContactMutation__
+ *
+ * To run a mutation, you first call `useDeleteContactMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteContactMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteContactMutation, { data, loading, error }] = useDeleteContactMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDeleteContactMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<IDeleteContactMutation, IDeleteContactMutationVariables>) {
+        return ApolloReactHooks.useMutation<IDeleteContactMutation, IDeleteContactMutationVariables>(DeleteContactDocument, baseOptions);
+      }
+export type DeleteContactMutationHookResult = ReturnType<typeof useDeleteContactMutation>;
+export type DeleteContactMutationResult = ApolloReactCommon.MutationResult<IDeleteContactMutation>;
+export type DeleteContactMutationOptions = ApolloReactCommon.BaseMutationOptions<IDeleteContactMutation, IDeleteContactMutationVariables>;
+export const ContactCreatedDocument = gql`
+    subscription ContactCreated {
+  result: contactCreated {
+    ...ContactDetails
+  }
+}
+    ${ContactDetailsFragmentDoc}`;
+
+/**
+ * __useContactCreatedSubscription__
+ *
+ * To run a query within a React component, call `useContactCreatedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useContactCreatedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useContactCreatedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useContactCreatedSubscription(baseOptions?: ApolloReactHooks.SubscriptionHookOptions<IContactCreatedSubscription, IContactCreatedSubscriptionVariables>) {
+        return ApolloReactHooks.useSubscription<IContactCreatedSubscription, IContactCreatedSubscriptionVariables>(ContactCreatedDocument, baseOptions);
+      }
+export type ContactCreatedSubscriptionHookResult = ReturnType<typeof useContactCreatedSubscription>;
+export type ContactCreatedSubscriptionResult = ApolloReactCommon.SubscriptionResult<IContactCreatedSubscription>;
+export const ContactUpdatedDocument = gql`
+    subscription ContactUpdated {
+  result: contactUpdated {
+    ...ContactDetails
+  }
+}
+    ${ContactDetailsFragmentDoc}`;
+
+/**
+ * __useContactUpdatedSubscription__
+ *
+ * To run a query within a React component, call `useContactUpdatedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useContactUpdatedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useContactUpdatedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useContactUpdatedSubscription(baseOptions?: ApolloReactHooks.SubscriptionHookOptions<IContactUpdatedSubscription, IContactUpdatedSubscriptionVariables>) {
+        return ApolloReactHooks.useSubscription<IContactUpdatedSubscription, IContactUpdatedSubscriptionVariables>(ContactUpdatedDocument, baseOptions);
+      }
+export type ContactUpdatedSubscriptionHookResult = ReturnType<typeof useContactUpdatedSubscription>;
+export type ContactUpdatedSubscriptionResult = ApolloReactCommon.SubscriptionResult<IContactUpdatedSubscription>;

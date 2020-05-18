@@ -6,14 +6,25 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper
+  Paper,
+  Button
 } from "@material-ui/core";
 
-import { IGetContactsQuery } from "../../generated/graphql";
+import { IContact } from "../../generated/graphql";
 
-const ContactsTable: React.FunctionComponent<IGetContactsQuery> = ({
-  result
+interface IPros {
+  result: IContact[];
+  onDelete: Function;
+}
+
+const ContactsTable: React.FunctionComponent<IPros> = ({
+  result,
+  onDelete
 }) => {
+  const deleteContact = (id: string) => {
+    onDelete({ id });
+  };
+
   return (
     <div>
       <h1>Contacts</h1>
@@ -26,6 +37,7 @@ const ContactsTable: React.FunctionComponent<IGetContactsQuery> = ({
               <TableCell align="left">Last Name</TableCell>
               <TableCell align="left">Email</TableCell>
               <TableCell align="left">Company</TableCell>
+              <TableCell align="left">Delete</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -39,6 +51,12 @@ const ContactsTable: React.FunctionComponent<IGetContactsQuery> = ({
                     <TableCell align="left">{contact.email}</TableCell>
                     <TableCell align="left">
                       {contact.company ? contact.company.company_name : null}
+                    </TableCell>
+
+                    <TableCell align="left">
+                      <Button onClick={() => deleteContact(contact.id)}>
+                        X
+                      </Button>
                     </TableCell>
                   </TableRow>
                 );
