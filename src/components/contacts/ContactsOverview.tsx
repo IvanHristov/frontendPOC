@@ -12,7 +12,8 @@ import {
   ContactCreatedDocument,
   ContactUpdatedDocument,
   useDeleteContactMutation,
-  IContactInput
+  IContactInput,
+  ContactDeletedDocument
 } from "../../generated/graphql";
 
 import ContactsTable from "./ContactsTable";
@@ -29,16 +30,35 @@ const ContactsOverview: FunctionComponent<RouteComponentProps> = () => {
           query: GetContactsDocument
         }) as IGetContactsQuery;
         if (result) {
-          cache.writeQuery({
-            query: GetContactsDocument,
-            data: { result: [newContact, ...result] }
-          });
+          if (result.findIndex(c => c?.id === newContact.id) === -1) {
+            cache.writeQuery({
+              query: GetContactsDocument,
+              data: { result: [newContact, ...result] }
+            });
+          }
         }
       }
     }
   });
 
-  const [deleteContact, deletedContact] = useDeleteContactMutation();
+  const [deleteContact] = useDeleteContactMutation({
+    update(cache, res) {
+      if (res.data) {
+        const dContacts = res.data.result;
+        if (dContacts.length && dContacts[0]) {
+          const currentContact: IContact = dContacts[0];
+          const { result } = cache.readQuery({
+            query: GetContactsDocument
+          }) as IGetContactsQuery;
+          const newResult = result.filter(c => c?.id !== currentContact.id);
+          cache.writeQuery({
+            query: GetContactsDocument,
+            data: { result: [...newResult] }
+          });
+        }
+      }
+    }
+  });
 
   useEffect(() => {
     subscribeToMore({
@@ -46,7 +66,6 @@ const ContactsOverview: FunctionComponent<RouteComponentProps> = () => {
       updateQuery: (prev, { subscriptionData }) => {
         if (!subscriptionData.data) return prev;
         const newContact = subscriptionData.data.result;
-
         return Object.assign({}, prev, {
           result: [newContact, ...prev.result]
         });
@@ -56,9 +75,17 @@ const ContactsOverview: FunctionComponent<RouteComponentProps> = () => {
     subscribeToMore({
       document: ContactUpdatedDocument,
       updateQuery: (prev, newData) => {
-        console.log("prev", prev);
-        console.log("newData", newData);
         return prev;
+      }
+    });
+
+    subscribeToMore({
+      document: ContactDeletedDocument,
+      updateQuery: (prev, { subscriptionData }: any) => {
+        if (!subscriptionData.data) return prev;
+        const deletedContact: IContact = subscriptionData.data.result;
+        const result = prev.result.filter(p => p?.id !== deletedContact?.id);
+        return { result };
       }
     });
   }, []);
@@ -86,7 +113,25 @@ const ContactsOverview: FunctionComponent<RouteComponentProps> = () => {
 
   const onDeleteContact = (input: IContactInput) => {
     console.log("in delete", input);
-    deleteContact({ variables: { input } });
+    deleteContact({
+      variables: { input: { id: input.id } },
+      optimisticResponse: {
+        __typename: "Mutation",
+        result: [
+          {
+            __typename: "Contact",
+            id: input.id ? input.id : "dasdas",
+            first_name: input.first_name,
+            last_name: input.last_name,
+            email: input.email,
+            company: {
+              __typename: "Company",
+              company_name: "hahaha"
+            }
+          }
+        ]
+      }
+    });
   };
 
   console.log("rerender");

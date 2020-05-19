@@ -131,6 +131,7 @@ export type ISubscription = {
    __typename?: 'Subscription';
   contactCreated: IContact;
   contactUpdated: IContact;
+  contactDeleted: IContact;
 };
 
 
@@ -197,6 +198,17 @@ export type IContactUpdatedSubscriptionVariables = {};
 
 
 export type IContactUpdatedSubscription = (
+  { __typename?: 'Subscription' }
+  & { result: (
+    { __typename?: 'Contact' }
+    & IContactDetailsFragment
+  ) }
+);
+
+export type IContactDeletedSubscriptionVariables = {};
+
+
+export type IContactDeletedSubscription = (
   { __typename?: 'Subscription' }
   & { result: (
     { __typename?: 'Contact' }
@@ -368,3 +380,31 @@ export function useContactUpdatedSubscription(baseOptions?: ApolloReactHooks.Sub
       }
 export type ContactUpdatedSubscriptionHookResult = ReturnType<typeof useContactUpdatedSubscription>;
 export type ContactUpdatedSubscriptionResult = ApolloReactCommon.SubscriptionResult<IContactUpdatedSubscription>;
+export const ContactDeletedDocument = gql`
+    subscription ContactDeleted {
+  result: contactDeleted {
+    ...ContactDetails
+  }
+}
+    ${ContactDetailsFragmentDoc}`;
+
+/**
+ * __useContactDeletedSubscription__
+ *
+ * To run a query within a React component, call `useContactDeletedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useContactDeletedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useContactDeletedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useContactDeletedSubscription(baseOptions?: ApolloReactHooks.SubscriptionHookOptions<IContactDeletedSubscription, IContactDeletedSubscriptionVariables>) {
+        return ApolloReactHooks.useSubscription<IContactDeletedSubscription, IContactDeletedSubscriptionVariables>(ContactDeletedDocument, baseOptions);
+      }
+export type ContactDeletedSubscriptionHookResult = ReturnType<typeof useContactDeletedSubscription>;
+export type ContactDeletedSubscriptionResult = ApolloReactCommon.SubscriptionResult<IContactDeletedSubscription>;

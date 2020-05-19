@@ -37,3 +37,9 @@ subscription ContactUpdated {
     ...ContactDetails
   }
 }
+
+subscription ContactDeleted {
+  result: contactDeleted {
+    ...ContactDetails
+  }
+}

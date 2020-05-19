@@ -21,8 +21,8 @@ const ContactsTable: React.FunctionComponent<IPros> = ({
   result,
   onDelete
 }) => {
-  const deleteContact = (id: string) => {
-    onDelete({ id });
+  const deleteContact = (input: IContact) => {
+    onDelete(input);
   };
 
   return (
@@ -54,9 +54,7 @@ const ContactsTable: React.FunctionComponent<IPros> = ({
                     </TableCell>
 
                     <TableCell align="left">
-                      <Button onClick={() => deleteContact(contact.id)}>
-                        X
-                      </Button>
+                      <Button onClick={() => deleteContact(contact)}>X</Button>
                     </TableCell>
                   </TableRow>
                 );
