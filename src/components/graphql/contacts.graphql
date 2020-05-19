@@ -4,6 +4,7 @@ fragment ContactDetails on Contact {
   last_name
   email
   company {
+    id
     company_name
   }
 }

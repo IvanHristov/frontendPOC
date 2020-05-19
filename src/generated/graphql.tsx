@@ -140,7 +140,7 @@ export type IContactDetailsFragment = (
   & Pick<IContact, 'id' | 'first_name' | 'last_name' | 'email'>
   & { company?: Maybe<(
     { __typename?: 'Company' }
-    & Pick<ICompany, 'company_name'>
+    & Pick<ICompany, 'id' | 'company_name'>
   )> }
 );
 
@@ -223,6 +223,7 @@ export const ContactDetailsFragmentDoc = gql`
   last_name
   email
   company {
+    id
     company_name
   }
 }

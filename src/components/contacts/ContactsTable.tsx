@@ -40,7 +40,7 @@ const ContactsTable: React.FunctionComponent<IPros> = ({
               <TableCell align="left">Delete</TableCell>
             </TableRow>
           </TableHead>
-          <TableBody>
+          <TableBody data-testid="cotacts-table-body">
             {result.map(contact => {
               if (contact) {
                 return (

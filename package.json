@@ -25,6 +25,7 @@
   "devDependencies": {
     "@apollo/react-common": "^3.1.4",
     "@apollo/react-components": "^3.1.5",
+    "@apollo/react-testing": "^3.1.4",
     "@babel/core": "^7.4.3",
     "@babel/plugin-proposal-class-properties": "^7.4.0",
     "@babel/preset-env": "^7.4.3",
@@ -33,11 +34,16 @@
     "@graphql-codegen/typescript": "^1.13.5",
     "@graphql-codegen/typescript-operations": "^1.13.5",
     "@graphql-codegen/typescript-react-apollo": "1.13.5",
+    "@testing-library/jest-dom": "^5.7.0",
+    "@testing-library/react": "^10.0.4",
+    "@types/jest": "^25.2.3",
     "@types/reach__router": "^1.2.3",
     "@types/react": "^16.8.7",
     "@types/react-dom": "^16.8.2",
+    "jest": "^26.0.1",
     "parcel-bundler": "^1.12.1",
     "prettier": "^1.16.1",
+    "ts-jest": "^26.0.0",
     "tslint": "^5.13.1",
     "tslint-config-prettier": "^1.18.0",
     "tslint-react": "^3.6.0",
@@ -46,7 +52,8 @@
   "scripts": {
     "clear-build-cache": "rm -rf .cache/ dist/",
     "start": "yarn generate && parcel src/index.html",
-    "generate": "graphql-codegen --config codegen.yml"
+    "generate": "graphql-codegen --config codegen.yml",
+    "test": "jest tests"
   },
   "browserslist": [
     "last 2 Chrome versions",
