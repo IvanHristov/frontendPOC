@@ -60,35 +60,35 @@ const ContactsOverview: FunctionComponent<RouteComponentProps> = () => {
     }
   });
 
-  // useEffect(() => {
-  //   subscribeToMore({
-  //     document: ContactCreatedDocument,
-  //     updateQuery: (prev, { subscriptionData }) => {
-  //       if (!subscriptionData.data) return prev;
-  //       const newContact = subscriptionData.data.result;
-  //       return Object.assign({}, prev, {
-  //         result: [newContact, ...prev.result]
-  //       });
-  //     }
-  //   });
+  useEffect(() => {
+    subscribeToMore({
+      document: ContactCreatedDocument,
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData.data) return prev;
+        const newContact = subscriptionData.data.result;
+        return Object.assign({}, prev, {
+          result: [newContact, ...prev.result]
+        });
+      }
+    });
 
-  //   subscribeToMore({
-  //     document: ContactUpdatedDocument,
-  //     updateQuery: (prev, newData) => {
-  //       return prev;
-  //     }
-  //   });
+    subscribeToMore({
+      document: ContactUpdatedDocument,
+      updateQuery: (prev, newData) => {
+        return prev;
+      }
+    });
 
-  //   subscribeToMore({
-  //     document: ContactDeletedDocument,
-  //     updateQuery: (prev, { subscriptionData }: any) => {
-  //       if (!subscriptionData.data) return prev;
-  //       const deletedContact: IContact = subscriptionData.data.result;
-  //       const result = prev.result.filter(p => p?.id !== deletedContact?.id);
-  //       return { result };
-  //     }
-  //   });
-  // }, []);
+    subscribeToMore({
+      document: ContactDeletedDocument,
+      updateQuery: (prev, { subscriptionData }: any) => {
+        if (!subscriptionData.data) return prev;
+        const deletedContact: IContact = subscriptionData.data.result;
+        const result = prev.result.filter(p => p?.id !== deletedContact?.id);
+        return { result };
+      }
+    });
+  }, []);
 
   const onSubmit = (input: INewContactInput) => {
     setModal(false);

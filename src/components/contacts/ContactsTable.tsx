@@ -54,7 +54,12 @@ const ContactsTable: React.FunctionComponent<IPros> = ({
                     </TableCell>
 
                     <TableCell align="left">
-                      <Button onClick={() => deleteContact(contact)}>X</Button>
+                      <Button
+                        data-testid={"cotact-delete-button-" + contact.id}
+                        onClick={() => deleteContact(contact)}
+                      >
+                        X
+                      </Button>
                     </TableCell>
                   </TableRow>
                 );
